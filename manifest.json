@@ -1,13 +1,28 @@
 {
   "manifest_version": 3,
   "name": "ClipRun",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Side-panel clipboard snippet runner — save, search and re-run your text snippets instantly",
-  "permissions": ["sidePanel", "storage", "clipboardWrite"],
+  "permissions": [
+    "sidePanel",
+    "scripting",
+    "clipboardRead",
+    "storage",
+    "tabs",
+    "activeTab",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ]
     }
   ],
   "side_panel": {
