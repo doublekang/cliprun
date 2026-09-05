@@ -1,17 +1,19 @@
-// Background service worker — minimal: ClipRun's work happens in the popup
-// via chrome.scripting against the target tab with guarded error boundaries.
-try {
-  console.log('[ClipRun] Background service worker started');
-
-  chrome.runtime.onInstalled.addListener((details) => {
-    try {
-      console.log('[ClipRun] Installed:', details.reason);
-    } catch (e) {
-      console.warn('[ClipRun] onInstalled handler warning:', e);
-    }
-  });
-} catch (error) {
-  console.error('[ClipRun] Background worker initialization error:', error);
+// ClipRun background service worker
+// The toolbar icon opens the side panel — there is no popup.
+if (typeof chrome !== 'undefined' && chrome.sidePanel?.setPanelBehavior) {
+  chrome.sidePanel
+    .setPanelBehavior({ openPanelOnActionClick: true })
+    .catch((error) => console.error('[ClipRun] setPanelBehavior failed:', error));
 }
+
+chrome.runtime.onInstalled.addListener((details) => {
+  console.log('[ClipRun] Installed:', details.reason);
+});
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  console.log('[ClipRun] Message received:', message);
+  sendResponse({ success: true });
+  return true;
+});
 
 export {};

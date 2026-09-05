@@ -1,10 +1,30 @@
 const esbuild = require('esbuild');
+const fs = require('fs');
+const path = require('path');
+const postcss = require('postcss');
+const tailwindcss = require('tailwindcss');
+const autoprefixer = require('autoprefixer');
 
 const isWatch = process.argv.includes('--watch');
 
+// Inline PostCSS plugin — compiles @import + @tailwind directives in every .css
+// file esbuild loads (emitting sidepanel.css at the extension root).
+const postcssPlugin = {
+  name: 'postcss-tailwind',
+  setup(build) {
+    build.onLoad({ filter: /\.css$/ }, async (args) => {
+      const source = fs.readFileSync(args.path, 'utf8');
+      const result = await postcss([tailwindcss, autoprefixer]).process(source, { from: args.path });
+      return { contents: result.css, loader: 'css' };
+    });
+  },
+};
+
 const buildOptions = {
   entryPoints: {
-    'popup': './src/popup/index.tsx',
+    // Side panel is the SOLE UI surface — no popup entry point.
+    'sidepanel': './src/sidepanel/index.tsx',
+    'content': './src/content/content.tsx',
     'background': './src/background/background.ts',
   },
   bundle: true,
@@ -16,6 +36,7 @@ const buildOptions = {
     '.ts': 'ts',
     '.css': 'css',
   },
+  plugins: [postcssPlugin],
   minify: !isWatch,
   sourcemap: isWatch,
   define: {
